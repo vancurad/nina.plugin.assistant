@@ -1,4 +1,5 @@
-﻿using Assistant.NINAPlugin.Astrometry;
+﻿using Accord;
+using Assistant.NINAPlugin.Astrometry;
 using Assistant.NINAPlugin.Database;
 using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan.Scoring;
@@ -11,6 +12,7 @@ using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Profile.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Assistant.NINAPlugin.Plan {
 
@@ -227,6 +229,22 @@ namespace Assistant.NINAPlugin.Plan {
                     DateTime targetStartTime = targetCircumstances.RiseAboveHorizonTime;
                     DateTime targetCulminationTime = targetCircumstances.CulminationTime;
                     DateTime targetEndTime = targetCircumstances.SetBelowHorizonTime;
+
+                    // Clip the time span to avoid overhead obstructions
+                    OverheadObstacleAvoidance overheadObstacleAvoidance = new OverheadObstacleAvoidance(activeProfile);
+                    TimeSpan timeToInterceptingObstruction = overheadObstacleAvoidance.TimeToInterceptObstacle(planTarget, planTarget.ExposurePlans.First(), atTime, targetEndTime);
+                    TimeSpan timeToSurpassObstruction = overheadObstacleAvoidance.TimeToSurpassObstacle(planTarget, planTarget.ExposurePlans.First(), atTime, targetEndTime);
+
+                    // If target is intercepted by overhead obstruction after some time
+                    if (timeToInterceptingObstruction.TotalSeconds > 0 && targetEndTime.IsGreaterThan(atTime.Add(timeToInterceptingObstruction)))
+                    {
+                        targetEndTime = atTime.Add(timeToSurpassObstruction);
+                    }
+                    // If target is obstructed in the beginning but settles under the obstruction later
+                    else if (timeToInterceptingObstruction.TotalSeconds == 0 && targetEndTime.IsGreaterThan(atTime.Add(timeToSurpassObstruction)))
+                    {
+                        targetStartTime = atTime.Add(timeToSurpassObstruction);
+                    }
 
                     // Clip time span to optional meridian window
                     TimeInterval meridianClippedSpan = null;

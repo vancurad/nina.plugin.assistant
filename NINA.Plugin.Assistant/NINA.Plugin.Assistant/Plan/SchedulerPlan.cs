@@ -347,13 +347,13 @@ namespace Assistant.NINAPlugin.Plan {
             if (project.UseCustomHorizon) {
                 if (profile.AstrometrySettings.Horizon == null) {
                     TSLogger.Warning("project 'Use Custom Horizon' is enabled but no custom horizon was found in the profile, defaulting to Minimum Altitude");
-                    return new HorizonDefinition(project.MinimumAltitude);
+                    return new HorizonDefinition(project.MinimumAltitude, project.overheadObstructionRadius);
                 }
 
-                return new HorizonDefinition(profile.AstrometrySettings.Horizon, project.HorizonOffset, project.MinimumAltitude);
+                return new HorizonDefinition(profile.AstrometrySettings.Horizon, project.HorizonOffset, project.MinimumAltitude, project.OverheadObstructionRadius);
             }
 
-            return new HorizonDefinition(project.MinimumAltitude);
+            return new HorizonDefinition(project.MinimumAltitude, project.overheadObstructionRadius);
         }
     }
 

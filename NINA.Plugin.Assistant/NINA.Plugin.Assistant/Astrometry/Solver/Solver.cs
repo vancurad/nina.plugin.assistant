@@ -1,6 +1,8 @@
 ﻿using Assistant.NINAPlugin.Util;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
+using System.Windows.Forms;
 
 namespace Assistant.NINAPlugin.Astrometry.Solver {
 

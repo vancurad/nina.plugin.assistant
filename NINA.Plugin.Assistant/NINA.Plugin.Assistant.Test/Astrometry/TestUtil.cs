@@ -192,7 +192,7 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
         }
 
         public static HorizonDefinition getHD(double minimumAltitude) {
-            return new HorizonDefinition(minimumAltitude);
+            return new HorizonDefinition(minimumAltitude, 0);
         }
 
         public static void AssertTime(DateTime expected, DateTime? actual, int hours, int minutes, int seconds) {

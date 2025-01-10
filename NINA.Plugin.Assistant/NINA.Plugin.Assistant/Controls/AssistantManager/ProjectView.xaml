@@ -258,6 +258,35 @@
                        Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
 
             <TextBlock VerticalAlignment="Center"
+           FontWeight="Bold"
+           IsEnabled="{Binding ProjectProxy.Project.UseCustomHorizon}"
+           Text="Overhead obstruction"
+           ToolTip="Radius of an object obstructing the view in a circle above the telescope, such as a balcony or roof."
+           ToolTipService.ShowOnDisabled="True" />
+            <TextBox MaxHeight="20"
+         IsEnabled="{Binding ProjectProxy.Project.UseCustomHorizon}"
+         Visibility="{Binding ShowEditView, Converter={StaticResource BooleanToVisibilityCollapsedConverter}}">
+                <TextBox.Text>
+                    <Binding Path="ProjectProxy.Project.OverheadObstructionRadius"
+                 UpdateSourceTrigger="LostFocus">
+                        <Binding.ValidationRules>
+                            <rules:DoubleRangeRule>
+                                <rules:DoubleRangeRule.ValidRange>
+                                    <rules:DoubleRangeChecker Maximum="90"
+                                                  Minimum="0" />
+                                </rules:DoubleRangeRule.ValidRange>
+                            </rules:DoubleRangeRule>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox.Text>
+            </TextBox>
+            <TextBlock MaxHeight="20"
+           Margin="3,3,0,0"
+           IsEnabled="{Binding ProjectProxy.Project.UseCustomHorizon}"
+           Text="{Binding ProjectProxy.Project.OverheadObstructionRadius, Converter={StaticResource DegreesDisplayConverter}}"
+           Visibility="{Binding ShowEditView, Converter={StaticResource InverseBooleanToVisibilityCollapsedConverter}}" />
+
+            <TextBlock VerticalAlignment="Center"
                        FontWeight="Bold"
                        Text="Meridian Window"
                        ToolTip="Limit imaging to this amount of time on either side of target meridian crossing" />

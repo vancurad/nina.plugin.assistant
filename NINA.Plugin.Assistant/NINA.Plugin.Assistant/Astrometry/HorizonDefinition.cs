@@ -9,18 +9,23 @@ namespace Assistant.NINAPlugin.Astrometry {
     public class HorizonDefinition {
         private bool isBasicMinimumAltitude;
         private readonly double minimumAltitude;
+        private readonly double overheadSpaceLimit;
         private readonly CustomHorizon horizon;
         private readonly double offset;
 
-        public HorizonDefinition(double minimumAltitude) {
+        public HorizonDefinition(double minimumAltitude, double overheadSpaceLimit) {
             Assert.isTrue(minimumAltitude >= 0 && minimumAltitude < 90, "minimumAltitude must be >= 0 and < 90");
             this.minimumAltitude = minimumAltitude;
+            this.overheadSpaceLimit = overheadSpaceLimit;
             this.isBasicMinimumAltitude = true;
         }
 
-        public HorizonDefinition(CustomHorizon customHorizon, double offset, double minimumAltitude = 0) {
+        public HorizonDefinition(CustomHorizon customHorizon, double offset, double minimumAltitude = 0, double overheadSpaceLimit = 0) {
             Assert.isTrue(offset >= 0, "offset must be >= 0");
             Assert.isTrue(minimumAltitude >= 0 && minimumAltitude < 90, "minimumAltitude must be >= 0 and < 90");
+            Assert.isTrue(overheadSpaceLimit <= 90, "maximumAltitude must be > minimumAltitude and <= 90");
+
+            this.overheadSpaceLimit = overheadSpaceLimit;
 
             if (customHorizon != null) {
                 this.minimumAltitude = minimumAltitude;
@@ -39,7 +44,7 @@ namespace Assistant.NINAPlugin.Astrometry {
             }
 
             double raw = Math.Max(horizon.GetAltitude(aat.Azimuth) + offset, minimumAltitude);
-            return raw > 90 ? 90 : raw;
+            return Math.Min(raw, 90);
         }
 
         public bool IsCustom() {
@@ -52,6 +57,11 @@ namespace Assistant.NINAPlugin.Astrometry {
             }
 
             return this.minimumAltitude;
+        }
+
+        public double GetFixedMaximumAltitude()
+        {
+            return 90 - this.overheadSpaceLimit;
         }
 
         public string GetCacheKey() {

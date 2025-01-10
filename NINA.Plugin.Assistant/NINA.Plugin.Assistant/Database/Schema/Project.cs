@@ -44,6 +44,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
         public int filterSwitchFrequency { get; set; }
         public int ditherEvery { get; set; }
         public int enableGrader { get; set; }
+        public double overheadObstructionRadius { get; set; }
 
         public virtual List<RuleWeight> ruleWeights { get; set; }
         public virtual List<Target> Targets { get; set; }
@@ -61,6 +62,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             MinimumAltitude = 0;
             UseCustomHorizon = false;
             HorizonOffset = 0;
+            OverheadObstructionRadius = 0;
             MeridianWindow = 0;
             FilterSwitchFrequency = 0;
             DitherEvery = 0;
@@ -257,6 +259,17 @@ namespace Assistant.NINAPlugin.Database.Schema {
             }
         }
 
+        [NotMapped]
+        public double OverheadObstructionRadius
+        {
+            get => overheadObstructionRadius;
+            set
+            {
+                overheadObstructionRadius = value;
+                RaisePropertyChanged(nameof(OverheadObstructionRadius));
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void RaisePropertyChanged([CallerMemberName] string propertyName = null) {
@@ -284,6 +297,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             project.enableGrader = enableGrader;
             project.isMosaic = isMosaic;
             project.flatsHandling = flatsHandling;
+            project.overheadObstructionRadius = overheadObstructionRadius;
 
             project.Targets = new List<Target>(Targets.Count);
             Targets.ForEach(item => project.Targets.Add(item.GetPasteCopy(newProfileId)));
@@ -318,6 +332,7 @@ namespace Assistant.NINAPlugin.Database.Schema {
             sb.AppendLine($"MinimumAltitude: {MinimumAltitude}");
             sb.AppendLine($"UseCustomHorizon: {UseCustomHorizon}");
             sb.AppendLine($"HorizonOffset: {HorizonOffset}");
+            sb.AppendLine($"OverheadObstructionRadius: {OverheadObstructionRadius}");
             sb.AppendLine($"MeridianWindow: {MeridianWindow}");
             sb.AppendLine($"FilterSwitchFrequency: {FilterSwitchFrequency}");
             sb.AppendLine($"DitherEvery: {DitherEvery}");

@@ -1,9 +1,11 @@
-﻿using Assistant.NINAPlugin.Database.Schema;
+﻿using Assistant.NINAPlugin.Astrometry;
+using Assistant.NINAPlugin.Database.Schema;
 using Assistant.NINAPlugin.Plan;
 using Assistant.NINAPlugin.Plan.Scoring;
 using FluentAssertions;
 using FluentAssertions.Extensions;
 using Moq;
+using NINA.Core.Model;
 using NINA.Plugin.Assistant.Shared.Utility;
 using NINA.Plugin.Assistant.Test.Astrometry;
 using NINA.Profile.Interfaces;
@@ -583,6 +585,62 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             window.StartTime.Should().BeCloseTo(atTime, precision);
             window.EndTime.Should().BeCloseTo(atTime.AddHours(3), precision);
             window.Duration.Should().Be(60 * 60 * 3);
+        }
+
+        [Test]
+        public void testFilterForOverheadObstructionAtStart()
+        {
+            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_1);
+
+            // Plan with overhead obstruction of 40.5 degree radius
+            HorizonDefinition hd = new HorizonDefinition(HorizonDefinition.GetConstantHorizon(0), 0, 0, 40.5);
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active, hd);
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
+            PlanMocks.AddMockPlanFilter(pt, pf);
+            PlanMocks.AddMockPlanTarget(pp1, pt);
+            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
+
+            // Target above obstruction at 20:00:00.
+            projects = new Planner(new DateTime(2024, 12, 31, 20, 0, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForVisibility(projects);
+            Assert.That(projects, Is.Not.Null);
+            projects.Count.Should().Be(1);
+
+            IPlanProject pp = projects[0];
+            pp.Name.Should().Be("pp1");
+            pp.Rejected.Should().BeTrue();
+            pp.RejectedReason.Should().Be(Reasons.ProjectAllTargets);
+            IPlanTarget pt1 = pp.Targets[0];
+            pt1.Rejected.Should().BeTrue();
+            pt1.RejectedReason.Should().Be(Reasons.TargetNotYetVisible);
+        }
+
+        [Test]
+        public void testFilterForOverheadObstructionAfterSomeTime()
+        {
+            Mock<IProfileService> profileMock = PlanMocks.GetMockProfileService(TestUtil.TEST_LOCATION_1);
+
+            // Plan with overhead obstruction of 40.5 degree radius
+            HorizonDefinition hd = new HorizonDefinition(HorizonDefinition.GetConstantHorizon(0), 0, 0, 40.5);
+            Mock<IPlanProject> pp1 = PlanMocks.GetMockPlanProject("pp1", ProjectState.Active, hd);
+            Mock<IPlanTarget> pt = PlanMocks.GetMockPlanTarget("M42", TestUtil.M42);
+            Mock<IPlanExposure> pf = PlanMocks.GetMockPlanExposure("Ha", 10, 0);
+            PlanMocks.AddMockPlanFilter(pt, pf);
+            PlanMocks.AddMockPlanTarget(pp1, pt);
+            List<IPlanProject> projects = PlanMocks.ProjectsList(pp1.Object);
+
+            // Target above obstruction around 20:00:00.
+            projects = new Planner(new DateTime(2024, 12, 31, 19, 45, 0), profileMock.Object.ActiveProfile, GetPrefs(), false).FilterForVisibility(projects);
+            Assert.That(projects, Is.Not.Null);
+            projects.Count.Should().Be(1);
+
+            IPlanProject pp = projects[0];
+            pp.Name.Should().Be("pp1");
+            pp.RejectedReason.Should().BeNull();
+            pp.Rejected.Should().BeFalse();
+            IPlanTarget pt1 = pp.Targets[0];
+            pt1.RejectedReason.Should().BeNull();
+            pt1.Rejected.Should().BeFalse();
         }
 
         [Test]

@@ -15,7 +15,7 @@ namespace NINA.Plugin.Assistant.Test.Astrometry {
 
         [Test]
         public void TestMinimumAltitudeOnly() {
-            HorizonDefinition sut = new HorizonDefinition(11);
+            HorizonDefinition sut = new HorizonDefinition(11, 0);
             sut.IsCustom().Should().BeFalse();
             sut.GetFixedMinimumAltitude().Should().Be(11);
             sut.GetTargetAltitude(null).Should().Be(11);

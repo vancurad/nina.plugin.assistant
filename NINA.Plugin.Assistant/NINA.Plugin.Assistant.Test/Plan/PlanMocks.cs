@@ -31,13 +31,13 @@ namespace NINA.Plugin.Assistant.Test.Plan {
             return profileMock;
         }
 
-        public static Mock<IPlanProject> GetMockPlanProject(string name, ProjectState state) {
+        public static Mock<IPlanProject> GetMockPlanProject(string name, ProjectState state, HorizonDefinition horizonDefinition = null) {
             Mock<IPlanProject> pp = new Mock<IPlanProject>();
             pp.SetupAllProperties();
             pp.SetupProperty(m => m.Name, name);
             pp.SetupProperty(m => m.State, state);
             pp.SetupProperty(m => m.Rejected, false);
-            pp.SetupProperty(m => m.HorizonDefinition, new HorizonDefinition(0));
+            pp.SetupProperty(m => m.HorizonDefinition, horizonDefinition == null ? new HorizonDefinition(0, 0) : horizonDefinition);
 
             pp.SetupProperty(m => m.MinimumTime, 30);
             pp.SetupProperty(m => m.MinimumAltitude, 0);
